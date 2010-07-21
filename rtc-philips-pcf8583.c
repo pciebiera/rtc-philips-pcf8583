@@ -8,64 +8,16 @@ Requires: PIC Micro with MSSP port connected to an I2C bus with the
           http://www.nxp.com/documents/data_sheet/PCF8583.pdf
   Author: Phil Ciebiera
  Revised: 7/20/2010
-  Status: Alpha
+  Status: Beta
 ********************************************************************/          
 
 
 #include <i2c.h>    // I2C interface routines
 
-#define RTC_Address                         0b10100000
-#define RTC_I2C_Read                        0x01
-#define RTC_I2C_Write                       0x00
-#define RTC_ADDR_CONFIG                     0x00
-#define RTC_ADDR_ALARM_CONFIG               0x08
-#define RTC_ALARM_MODE_DATED                0x01
-#define RTC_ALARM_MODE_TIMED                0x02
-#define RTC_ALARM_INTERRUPT                 0x01
-#define RTC_ALARM_INTERRUPT_NONE            0x00
-
-#define RTC_ALARM_TIMED_UNIT_1_100_SECONDS  0b00000001
-#define RTC_ALARM_TIMER_UNIT_SECONDS        0b00000010
-#define RTC_ALARM_TIMED_UNIT_MINUTES        0b00000011
-#define RTC_ALARM_TIMED_UNIT_HOURS          0b00000100
-#define RTC_ALARM_TIMED_UNIT_DAYS           0b00000101
-
-#define RTC_ADDR_ALARM_1_100_SECONDS        0x09
-#define RTC_ADDR_ALARM_SECONDS              0x0A
-#define RTC_ADDR_ALARM_MINUTES              0x0B
-#define RTC_ADDR_ALARM_HOURS                0x0C
-#define RTC_ADDR_ALARM_DATE                 0x0D
-#define RTC_ADDR_ALARM_MONTH                0x0E
-#define RTC_ADDR_ALARM_TIMER                0x0F
-
-#define RTC_ADDR_TIME_1_100_SECONDS         0x01
-#define RTC_ADDR_TIME_SECONDS               0x02
-#define RTC_ADDR_TIME_MINUTES               0x03
-#define RTC_ADDR_TIME_HOURS                 0x04
-#define RTC_ADDR_TIME_YEAR_DATE             0x05
-#define RTC_ADDR_TIME_WEEKDAYS_MONTH        0x06
-#define RTC_ADDR_TIMER                      0x07
-
-#define RTC_OVERWRITE                       0x09
-#define RTC_PAUSE_CLOCK                     0x01
-#define RTC_DONT_PAUSE_CLOCK                0x00
-
 unsigned char RTC_I2C_OPEN = 0;
 unsigned char RTC_STOPPED = 0;
 unsigned int RTC_BASE_YEAR = 0;
 unsigned int RTC_PREVIOUS_BASE_YEAR = 0;
-
-struct Timestamp {
-    unsigned char Month;
-    unsigned char Date;
-    unsigned int Year;
-    unsigned char Hour;
-    unsigned char Minute;
-    unsigned char Second;
-};
-
-void rtcStopClock ( void );
-void rtcStartClock ( void );
 
 
 //###### INTERNAL SUPPORT FUNCTIONS ######
@@ -388,8 +340,6 @@ void rtcTimerAlarmReset ( void ) {
 }
 // Sets the RTC alarm timer interval [1 - 99]
 void rtcSetAlarmInterval ( unsigned char bInterval ) {
-    rtcAdjustRegister(RTC_ADDR_ALARM_TIMER,RTC_OVERWRITE,rtcDECtoBCD(bInterval),RTC_DONT_PAUSE_CLOCK);
-    rtcAdjustRegister(RTC_ADDR_TIMER,RTC_OVERWRITE,0,RTC_DONT_PAUSE_CLOCK);
-    //bInterval = 99 - bInterval;                                                // Set the timer to the specified interval
-    //rtcAdjustRegister(RTC_ADDR_TIMER,RTC_OVERWRITE,0,RTC_DONT_PAUSE_CLOCK);    // Write the new value to the timer address
+    rtcAdjustRegister(RTC_ADDR_ALARM_TIMER,RTC_OVERWRITE,rtcDECtoBCD(bInterval),RTC_DONT_PAUSE_CLOCK);  // Set the timer to the specified interval
+    rtcAdjustRegister(RTC_ADDR_TIMER,RTC_OVERWRITE,0,RTC_DONT_PAUSE_CLOCK);                             // Reset the counter
 }
